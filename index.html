@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>名簿管理アプリver2</title>
+  <title>名簿管理アプリver3</title>
 
   <!-- Firebase CDN (modular syntax対応) -->
   <script type="module">
@@ -113,6 +113,7 @@
   <label><input type="checkbox" value="RC">RC</label>
   <label><input type="checkbox" value="RAC">RAC</label>
   <label><input type="checkbox" value="地区RAC">地区RAC</label>
+  <label><input type="checkbox" value="地区RC">地区RC</label>
   <label><input type="checkbox" value="OBOG">OBOG</label>
   <label><input type="checkbox" value="ゲスト">ゲスト</label>
   <br>
@@ -121,7 +122,16 @@
   <input type="number" id="roleorder" placeholder="役職順"><br>
 
   <button onclick="addMember()">追加</button>
-
+<div>
+  <h2>参考</h2>
+  <p>発会順</p>
+  <p>1．小倉東2．若松3．福岡4．八幡5．福岡西6．福岡南7．福岡城西8．久留米9．門司西10.福岡東南11．福岡中央12．田川</p>
+  <p>役職順</p>
+  <p>1．会長2．会長エレクト3．副会長4．幹事5．会計6．直前会長7．SAA8．副SAA9．副幹事10.副会計11．長期計画委員会</p>
+  <p>11．クラブ運営事業12．クラブ基盤事業13．広報事業14．奉仕事業15．国際事業</p>
+  <p>RI第2700地区地区委員会</p>
+  <p>1．ロータリーフェローズ2700委員会2．ローターアクト委員会3．危機管理委員会4．会員増強委員会</p>
+</div>
   <h2>名簿一覧</h2>
   <div id="memberList"></div>
 
