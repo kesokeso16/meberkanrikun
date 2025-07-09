@@ -3,13 +3,104 @@
 <head>
   <meta charset="UTF-8" />
   <title>名簿管理アプリ</title>
-  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js"></script>
-  <link rel="manifest" href="/manifest.json">
-<link rel="icon" href="/icon-192.png">
-<meta name="theme-color" content="#ffffff">
 
+  <!-- Firebase CDN (modular syntax対応) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy, where, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+
+    // Firebase設定
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZAtGXgtYuioTNGNX13v2lrkaZ9KFUaA4",
+      authDomain: "yahatarac-cb97a.firebaseapp.com",
+      projectId: "yahatarac-cb97a",
+      storageBucket: "yahatarac-cb97a.appspot.com",
+      messagingSenderId: "124486308567",
+      appId: "1:124486308567:web:5434a1dfd476ac5a6c5692"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // メンバー追加関数
+    window.addMember = async function() {
+      const name = document.getElementById("name").value;
+      const name2 = document.getElementById("name2").value;
+      const club = document.getElementById("club").value;
+      const role = document.getElementById("role").value;
+      const cluborder = parseInt(document.getElementById("cluborder").value);
+      const roleorder = parseInt(document.getElementById("roleorder").value);
+
+      const affiliations = [];
+      document.querySelectorAll('input[type=checkbox]:checked').forEach(cb => {
+        affiliations.push(cb.value);
+      });
+
+      // 重複チェック
+      const q = query(collection(db, "member"), where("name", "==", name));
+      const snapshot = await getDocs(q);
+
+      if (!snapshot.empty) {
+        alert("同じ名前のデータが存在します。更新します。");
+
+        snapshot.forEach(async (d) => {
+          const ref = doc(db, "member", d.id);
+          await updateDoc(ref, {
+            name2: name2,
+            club: club,
+            role: role,
+            affiliations: affiliations,
+            cluborder: cluborder,
+            roleorder: roleorder
+          });
+        });
+
+      } else {
+        await addDoc(collection(db, "member"), {
+          name: name,
+          name2: name2,
+          club: club,
+          role: role,
+          affiliations: affiliations,
+          cluborder: cluborder,
+          roleorder: roleorder
+        });
+        alert("追加完了！");
+      }
+
+      loadMembers(); // 更新後再読み込み
+    }
+
+    // メンバー一覧取得関数
+    async function loadMembers() {
+      const memberList = document.getElementById("memberList");
+      memberList.innerHTML = "";
+
+      console.log("Loading members...");
+      const q = query(collection(db, "member"), orderBy("cluborder"));
+      const snapshot = await getDocs(q);
+
+      console.log("Snapshot size:", snapshot.size);
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        console.log("Data:", data);
+        memberList.insertAdjacentHTML("beforeend", `${data.name} (${data.role}) - ${data.club}<br>`);
+      });
+    }
+
+    // 初期表示
+    loadMembers();
+
+  </script>
+
+  <!-- PWA設定 -->
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="/icon-192.png">
+  <meta name="theme-color" content="#ffffff">
 </head>
+
 <body>
   <h2>名簿追加フォーム</h2>
 
@@ -35,89 +126,12 @@
   <div id="memberList"></div>
 
   <script>
- if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/service-worker.js')
-    .then(reg => console.log("Service Worker Registered", reg))
-    .catch(err => console.log("SW registration failed", err));
-  }
-
-
-    // Firebase初期化
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
-    // メンバー追加関数
-    async function addMember() {
-      const name = document.getElementById("name").value;
-      const name2 = document.getElementById("name2").value;
-      const club = document.getElementById("club").value;
-      const role = document.getElementById("role").value;
-      const cluborder = parseInt(document.getElementById("cluborder").value);
-      const roleorder = parseInt(document.getElementById("roleorder").value);
-
-      const affiliations = [];
-      document.querySelectorAll('input[type=checkbox]:checked').forEach(cb => {
-        affiliations.push(cb.value);
-      });
-
-      // 重複チェック: 名前が同じドキュメントがあるか
-      const snapshot = await db.collection("member").where("name", "==", name).get();
-
-      if (!snapshot.empty) {
-        alert("同じ名前のデータが存在します。更新します。");
-
-        // 既存データを更新
-        snapshot.forEach(doc => {
-          db.collection("member").doc(doc.id).update({
-            name2: name2,
-            club: club,
-            role: role,
-            affiliations: affiliations,
-            cluborder: cluborder,
-            roleorder: roleorder
-          });
-        });
-
-      } else {
-        // 新規追加
-        db.collection("member").add({
-          name: name,
-          name2: name2,
-          club: club,
-          role: role,
-          affiliations: affiliations,
-          cluborder: cluborder,
-          roleorder: roleorder
-        });
-        alert("追加完了！");
-      }
-
-      loadMembers(); // 更新後に再読み込み
+    // Service Worker登録
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(reg => console.log("Service Worker Registered", reg))
+        .catch(err => console.log("SW registration failed", err));
     }
-
-    // メンバー一覧取得関数
-    async function loadMembers() {
-      const memberList = document.getElementById("memberList");
-      memberList.innerHTML = "";
-
-      const snapshot = await db.collection("member").orderBy("cluborder").get();
-
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        memberList.innerHTML += `${data.name} (${data.role}) - ${data.club}<br>`;
-      });
-    }
-
-    // 初期表示
-    loadMembers();
   </script>
 </body>
 </html>
